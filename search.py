@@ -87,7 +87,42 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    "initialize the frontier using the initial state of problem"
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+
+    frontier = util.Stack()
+    start = (problem.getStartState(), [], 0)
+    frontier.push(start)
+
+    "initialize the explored set to be empty"
+    explored = []
+    # loop(do if (the frontier is empty then(
+    while True:
+        if frontier.isEmpty():
+            return []
+        # choose a node and remove it from the frontier
+        else:
+            current = frontier.pop()
+            # if (the node contains a goal state then
+            if problem.isGoalState(current[0]):
+                return current[1]
+            else:
+                # else add the node to the explored set
+                explored.append(current[0])
+                # expand the chosen node, adding all the neighboring nodes to the frontier
+                # but only if the child is not already in the explored set
+                for node in problem.getSuccessors(current[0]):
+                    if node[0] not in explored:
+                        # make the directions into a list, and add costs before pushing to stack.
+                        frontier.push((node[0], current[1] + [node[1]], current[2] + node[2]))
+
+
+
+
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
