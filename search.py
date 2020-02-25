@@ -89,10 +89,6 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     "initialize the frontier using the initial state of problem"
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-
     frontier = util.Stack()
     start = (problem.getStartState(), [], 0)
     frontier.push(start)
@@ -119,15 +115,40 @@ def depthFirstSearch(problem):
                         # make the directions into a list, and add costs before pushing to stack.
                         frontier.push((node[0], current[1] + [node[1]], current[2] + node[2]))
 
-
-
-
-
-
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.Queue()
+    start = (problem.getStartState(), [], 0)
+    frontier.push(start)
+
+    "initialize the explored set to be empty"
+    explored = []
+    expanded = []
+    # loop(do if (the frontier is empty then(
+    while True:
+        if frontier.isEmpty():
+            return []
+        # choose a node and remove it from the frontier
+        else:
+            current = frontier.pop()
+            # if (the node contains a goal state then
+            if problem.isGoalState(current[0]):
+                return current[1]
+            else:
+                # else add the node to the explored set
+                if current[0] not in explored:
+                    explored.append(current[0])
+                # expand the chosen node, adding all the neighboring nodes to the frontier
+                # but only if the child is not already in the explored set
+                for node in problem.getSuccessors(current[0]):
+                    if node[0] not in explored and node[0] not in expanded:
+                        # make the directions into a list, and add costs before pushing to stack.
+                        # new_node = (node[0], current[1] + [node[1]], current[2] + node[2])
+                        # print(new_node)
+                        frontier.push((node[0], current[1] + [node[1]], current[2] + node[2]))
+                        expanded.append(node[0])  # preventing duplicate expansions
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
