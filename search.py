@@ -153,7 +153,36 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    start = (problem.getStartState(), [], 0)
+    frontier.push(start, 0)
+
+    total_cost = start[2]
+    explored = []
+    expanded = []
+    # loop(do if (the frontier is empty then(
+    while True:
+        if frontier.isEmpty():
+            return []
+        # choose a node and remove it from the frontier
+        else:
+            current = frontier.pop()
+            # if (the node contains a goal state then
+            if problem.isGoalState(current[0]) and current[2] <= total_cost:
+                return current[1]
+            else:
+                # else add the node to the explored set
+                if current[0] not in explored:
+                    explored.append(current[0])
+                # expand the chosen node, adding all the neighboring nodes to the frontier
+                # but only if the child is not already in the explored set
+                for node in problem.getSuccessors(current[0]):
+                    if node[0] not in explored:
+                        # expanding to a goal state multiple times is fine.
+                        if problem.isGoalState(node[0]) or node[0] not in expanded:
+                            total_cost = current[2] + node[2]
+                            frontier.push((node[0], current[1] + [node[1]], total_cost), total_cost)
+                            expanded.append(node[0])  # preventing duplicate expansions
 
 def nullHeuristic(state, problem=None):
     """
