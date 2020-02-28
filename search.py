@@ -157,18 +157,14 @@ def uniformCostSearch(problem):
     start = (problem.getStartState(), [], 0)
     frontier.push(start, 0)
 
-    total_cost = start[2]
     explored = []
     expanded = []
-    # loop(do if (the frontier is empty then(
     while True:
         if frontier.isEmpty():
             return []
-        # choose a node and remove it from the frontier
         else:
             current = frontier.pop()
-            # if (the node contains a goal state then
-            if problem.isGoalState(current[0]) and current[2] <= total_cost:
+            if problem.isGoalState(current[0]):
                 return current[1]
             else:
                 # else add the node to the explored set
