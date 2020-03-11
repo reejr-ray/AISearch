@@ -70,7 +70,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
     """
@@ -134,6 +134,8 @@ def breadthFirstSearch(problem):
             current = frontier.pop()
             # if (the node contains a goal state then
             if problem.isGoalState(current[0]):
+                print("Goal State:", current)
+                print("cost of solution:", current[2])
                 return current[1]
             else:
                 # else add the node to the explored set
@@ -190,8 +192,44 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    start = (problem.getStartState(), [], 0)
+    heu = heuristic(problem.getStartState(), problem)
+    frontier.push(start, start[2] + heu)
 
+    explored = []
+    expanded = []
+
+    explored.append((start[0], start[2] + heu))
+
+    while True:
+        if frontier.isEmpty():
+            return []
+        else:
+            current = frontier.pop()
+            if problem.isGoalState(current[0]):
+                return current[1]
+            else:
+                # else add the node to the explored set
+                if current[0] not in explored:
+                    explored.append(current[0])
+                # expand the chosen node, adding all the neighboring nodes to the frontier
+                # but only if the child is not already in the explored set
+
+                for node in problem.getSuccessors(current[0]):
+                    heu = heuristic(node[0], problem)
+                    total_cost = current[2] + node[2]
+                    total_heu_cost = total_cost + heu
+                    if node[0] not in explored[0]:
+                        # add it to the explored set
+                        # print(node[0], heu)
+                        explored.append((node[0], node[2] + heu))
+                        # check its heuristic & add it to a list
+                        # expanding to a goal state multiple times is fine.
+                        if problem.isGoalState(node[0]) or node[0] not in expanded:
+                            # print("node to expand ->", node[0], "Cost of ->", total_cost)
+                            frontier.push((node[0], current[1] + [node[1]], total_cost), total_heu_cost)
+                            expanded.append(node[0])  # preventing duplicate expansions
 
 # Abbreviations
 bfs = breadthFirstSearch

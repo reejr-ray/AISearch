@@ -288,21 +288,33 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.touchedCorners = set()
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # TODO YOUR CODE HERE
+        visitedCorners = []
+        return (self.startingPosition, visitedCorners)
+
+
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # goal state is when the pacman has touched all of the corners
+        if len(state[1]) == 4:
+            print(state)
+            return True
+        else:
+            return False
+
+
+
 
     def getSuccessors(self, state):
         """
@@ -315,6 +327,7 @@ class CornersProblem(search.SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
+
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
@@ -323,10 +336,26 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
             "*** YOUR CODE HERE ***"
+            nextNode = (nextx, nexty)
+            # if its not a wall, check to see if its successor is a corner
+            # if the succ is a corner, check to see if its already been visited
+            # if not visited, append it to the list of visited
+            # add the valid successor to list of successors
+            if not hitsWall:
+                if nextNode in self.corners and nextNode not in state[1]:
+                    state[1].append(nextNode)
+                    successors.append(((nextNode, state[1]), action, 1))
+                    print(state)
+                    print("Corners:", self.corners)
+                # state[1] will change if its a corner before the append occurs
+                successors.append(((nextNode, state[1]), action, 1))
 
-        self._expanded += 1 # DO NOT CHANGE
+        self._expanded += 1  # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
