@@ -258,7 +258,97 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalMoves = gameState.getLegalActions()
+
+        highScore = float('-inf')  # initialize the value to neg. infinity
+        bestAction = None
+        alpha = float('-inf')
+        beta = float('inf')
+        for action in legalMoves:
+            if action == None:  # prevents returning Nonetype
+                bestAction = action
+            successorGameState = gameState.generateSuccessor(0, action)
+            '''   1 depth = 1 action looked at
+                  1 index = ghost's turn (since we start in depth 1 instead of at top)
+                  call minimizing function because 
+            '''
+            # print("starting minimax at depth of", self.depth)
+            newScore = self.getMin(successorGameState, self.depth, 1, alpha, beta)  # 1 depth, 1 index = ghost
+            # same as max, but grabbing the best action
+            if newScore > highScore:
+                highScore = newScore
+                bestAction = action
+            alpha = max(alpha, newScore)
+            if beta < alpha:
+                break
+        # after all actions have been exhausted, return the best action.
+        # print("Best action is", bestAction, "with a highscore of", highScore)
+        return bestAction
+
+    def getMax(self, gameState, depth, index, alpha, beta):
+        '''
+        returns the maximum value - In this case, used for PACMAN
+        '''
+        # initialize the value to neg. infinity
+        value = float('-inf')
+        # if no valid moves left, return score
+        if depth == 0 or len(
+                gameState.getLegalActions(index)) == 0:  # getLegalActions already calls isWin() and isLose()
+            return self.evaluationFunction(gameState)
+        # pacman's turn
+        for action in gameState.getLegalActions(index):
+            # TODO call getMin wth index incremented, same depth
+            successor = gameState.generateSuccessor(index, action)
+            # print("Calling getMin() on", action, "keeping depth at", depth, "and setting index to", index + 1)
+            childVal = self.getMin(successor, depth, index + 1, alpha, beta)
+            value = max(value, childVal)
+            alpha = max(alpha, childVal)
+            if beta < alpha:
+                break
+        return value
+
+    def getMin(self, gameState, depth, index, alpha, beta):  # index needed because ghosts use this function
+        '''
+            returns the minimum value - used for GHOSTS or min players
+        '''
+        # if no valid moves left, return score
+        if depth == 0 or len(
+                gameState.getLegalActions(index)) == 0:  # getLegalActions already calls isWin() and isLose()
+            return self.evaluationFunction(gameState)
+
+        ''' need a for-loop for each player to check all positions for best action
+            on that minimizing player
+        '''
+        # first to almost last ghost's turn
+        if index < gameState.getNumAgents() - 1:  # provided that index is always >= 1 in getMin
+            value = float('inf')  # initialize val to pos. infinity
+            # TODO call getMin with incremented index, same depth
+            for action in gameState.getLegalActions(index):  # need 2 for loops to check all positions for
+                # generate a successor for that action
+                successor = gameState.generateSuccessor(index, action)
+                # check the value of the child
+                # print("Calling getMin() on", action, "keeping depth at", depth, "and setting index to", index+1)
+                childVal = self.getMin(successor, depth, index + 1, alpha, beta)
+                # take the minimum of the current low and child's val
+                value = min(value, childVal)
+                beta = min(beta, childVal)
+                if beta < alpha:
+                    break
+            return value
+
+        # last ghost's turn -> pacman's turn
+        else:
+            value = float('inf')
+            # TODO call getMax with index 0, increased depth
+            for action in gameState.getLegalActions(index):
+                successor = gameState.generateSuccessor(index, action)
+                # print("Calling getMax() on", action, "with a depth of", depth+1, "and setting index to", 0)
+                childVal = self.getMax(successor, depth - 1, 0, alpha, beta)
+                value = min(value, childVal)
+                beta = min(beta, childVal)
+                if beta < alpha:
+                    break
+            return value
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
