@@ -172,7 +172,70 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalMoves = gameState.getLegalActions()
+
+        highScore = float('-inf')  # initialize the value to neg. infinity
+        bestAction = None
+        for action in legalMoves:
+            if action == None:  # prevents returning Nonetype
+                bestAction = action
+            successorGameState = gameState.generateSuccessor(0, action)
+            #print("for action", action, "--------------")
+            newScore = self.getMin(successorGameState, 1, 0)  # 1 depth, 0 index = pacman
+
+            #print("newScore =", newScore)
+            if newScore > highScore:
+                highScore = newScore
+                bestAction = action
+        # after all actions have been exhausted, return the best action.
+        return bestAction
+
+    '''
+        Two functions are needed because depth is a requirement
+    '''
+
+    def getMax(self, gameState, depth, index):
+        '''
+        returns the maximum value - In this case, used for PACMAN
+        '''
+        # initialize the value to neg. infinity
+        value = float('-inf')
+        # terminal state or at bottom
+        if len(gameState.getLegalActions(index)) == 0:
+            #print("(", depth, ",", index, ")")
+            return self.evaluationFunction(gameState)
+        # for pacman
+        for action in gameState.getLegalActions(index):
+            #find all
+            #print("Player", index, "explores depth", depth, "and chooses", action)
+            succ = self.getMin(gameState.generateSuccessor(index, action), depth, index)
+            #print("Player", index, "ended up with", succ)
+            value = max(value, succ)
+        #print(value)
+        return value
+
+    def getMin(self, gameState, depth, index):  # index needed because ghosts use this function
+        '''
+        returns the minimum value - used for GHOSTS
+        '''
+        # initialize to pos. infinity
+        value = float('inf')
+        # terminal state or at bottom
+        if len(gameState.getLegalActions(index)) == 0:
+            return self.evaluationFunction(gameState)
+        # for ghosts [1:]
+        if index < gameState.getNumAgents() - 1:
+            for action in gameState.getLegalActions(index):
+                succ = self.getMin(gameState.generateSuccessor(index, action), depth, index+1)
+                value = min(value, succ)
+        # last ghost, then its pacman's turn
+        else:
+            for action in gameState.getLegalActions(index):
+                #print("Player", index, "explores depth", depth +1, "and chooses", action)
+                succ = self.getMax(gameState.generateSuccessor(index, action), depth+1, 0)
+                #print("Player", index, "ended up with", succ)
+                value = min(value, succ)
+        return value
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
