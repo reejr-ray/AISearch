@@ -440,38 +440,42 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    highScore = 0
-    successorGameState = currentGameState.generatePacmanSuccessor(action)
     pacPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     capsules = currentGameState.getCapsules()  # get all the capsules.
     numFood = len(newFood.asList())
     numCapsule = len(capsules)
     ghostStates = currentGameState.getGhostStates()
-    newScaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
-    # gets high score of 1200. not bad, but doesn't take into account the powerups.
-    score = successorGameState.getScore()
 
+    highScore = 0
     # test to see if ghost is close to the pacman & if ghost is intending to move into pacman
-    for ghost in newGhostStates:
+    for ghost in ghostStates:
         ghostPos = ghost.getPosition()
-        dir = ghost.getDirection()
-        ghostDis = 3 - manhattanDistance(newPos, ghostPos)
+        ghostDis = 3 - manhattanDistance(pacPos, ghostPos)
         if ghostDis <= 2:
-            # pacman has to pay attention to the ghost's direction
-            if dir != action:
-                # collision imminent
-                score -= 6 ** ghostDis
+            # if the scaredtimer is not worn out, go towards it
+            if ghost.scaredTimer > 2:
+                # get em!
+                highScore += 10 ** ghostDis
             else:
-                score -= 5 ** ghostDis
+                # run away!
+                highScore -= 6 ** ghostDis
         else:
-            score -= 4 ** ghostDis
+            highScore -= 2 * ghostDis
+
+    for capsule in capsules:
+        capDis = 1 / manhattanDistance(pacPos, capsule)
+        highScore += 3 * capDis
 
     for point in newFood.asList():
-        foodDis = 1 / manhattanDistance(newPos, point)
-        score += foodDis
+        foodDis = 1 / manhattanDistance(pacPos, point)
+        highScore += foodDis
 
-    return score
+    # its percieved score increases as the score gets higher
+    highScore += 2*(currentGameState.getScore())
+    # incentivizes pacman to eat food quickly
+    highScore -= 12 * (numFood + numCapsule)
+    return highScore
 
 # Abbreviation
 better = betterEvaluationFunction
